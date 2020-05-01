@@ -1,0 +1,103 @@
+\chapter{DEFINIÇÃO DO PROBLEMA DE ROTEAMENTO DE CABOS}\label{chap:2}
+
+O primeiro passo no desenvolvimento de uma fazenda eólica é a definição das localizações das turbinas, da subestação e dos pontos de Steiner.
+Neste trabalho, é assumido que as localizações já foram definidas.
+Também é assumido que haverá apenas uma subestação por fazenda.
+Durante todo o trabalho, a energia será dada na unidade de medida \it{megawatt} ($MW$), exceto quando a medida estiver presente de maneira explícita.
+
+O problema foi modelado baseado na formulação de~\citeonline{fischetti2017}, que assume os seguintes critérios:~
+\begin{itemize}
+  \item Qualquer cabo deve ter uma capacidade maior que o total de energia produzida por qualquer turbina;~
+  \item Cabos diferentes estão disponíveis;~
+  \item Um cabo deve suportar o fluxo de energia que passa por ele;~
+  \item É dado o número máximo~$C$ de cabos podem ser conectados a uma subestação;~
+  \item Cabos cruzados devem ser evitados.
+\end{itemize}
+
+\section{Definição formal}
+
+\begin{sloppypar}
+
+Considere o grafo completo e não direcionado~$G=(V, A)$, sem loops.
+No grafo, os nós em~$V$ são as turbinas~$V_{T}$, juntamente com a subestação~$V_{0}$.
+As conexões possíveis são representadas pelo conjunto de arestas~$A$, denotadas por~$(a, b)$, indicando que é possível passar um cabo conectando os nós~$a, b \in V$.
+Todo nó~$v \in V$ possui coordenadas em um plano, permitindo o cálculo da distância entre eles e também determinar se um par de conexões~$(i, j)$ e~$(h, k)$ se cruzam.
+Não é considerado cruzamento se ele ocorrer em um nó, ou seja, nos pontos extremos da conexão, desde que um dos cabos esteja conectado ao nó em questão.
+É permitido ter cabos paralelos, já que os mesmos não se cruzam e não criará problemas, mas não é permitido passar dois cabos entre nós.
+A variável~
+\[\zeta = \{[(i, j), (h, k)]\ |\ (i, j), (h, k) \in A \text{ e } (i, j), (h, k) \text{ se cruzam}\}\]
+define o conjunto de pares de cabos que se cruzam.
+
+Considere ainda que~$P_v \geq 0$ é o total de energia produzida pelo nó~$v \in V$.
+Mais especificamente,~$P_{v} > 0$ para~$v \in V_{T}$ e~$P_{v} = 0$ se~$v \in V_{0}$. %e~$P_{v} = 0$ para~$v \in V_{S}$.
+% Como uma subestação não produz energia,~$P_{v}$ é irrelevante se~$v \in V_{0}$.
+O fluxo de energia~$f_{i, j} \geq 0$ representa a energia total conduzida a partir do nó~$i \in V$ para~$j \in V$.
+% Note que a direção do fluxo de energia é das turbinas para a subestação, ou seja, se~$f_{i, j} > 0$, então~$f_{j, i} = 0$.
+% Isso também implica em~$f_{i, j} > 0$ se~$j \in V_{0}$.
+
+Considere um conjunto de cabos~$T$, cada cabo~$t \in T$ com custo~$u_{t}$ por unidade de comprimento e capacidade elétrica~$k_{t}$.
+O custo para passar o cabo~$t$ na aresta~$(i, j)$ é~
+\[c_{i, j}^{t}=u_{t} \cdot dist(i, j)\]
+em que~$dist(i, j)$ representa a distância euclidiana entre os nós~$i$~e~$j$.
+
+Formalmente, o problema de roteamento de cabos é: dado um grafo~$G$, um conjunto de cabos~$T$ e o número de máximo de conexões à subestação~$C$,
+encontrar o custo mínimo para conectar as turbinas em~$V_{T}$ à subestação em~$V_{0}$, direta ou indiretamente, opcionalmente utilizando alguns dos pontos em~$V_{S}$,
+de modo que não hajam cabos cruzados~$[(i, j), (h, k)] \in \zeta$ e a energia~$f_{i, j}$ não exceda a capacidade do cabo que passa pela aresta~$(i, j) \in A$,
+permitindo a coleta de toda energia~$\sum_{v \in V_{T}}{P_{v}}$.
+
+\end{sloppypar}
+
+\section{Formulação matemática}
+
+% A energia total no nó~$i$ é representada por~$\tau_{i}$.
+
+Na formulação a seguir, a variável~$y_{i, j}^{t}$ define se existe um cabo na conexão~$[i, j]$.
+De semelhante modo, a variável~$x_{i, j}^{t}$ define se o cabo do tipo~$t$ é utilizado na conexão~$[i, j]$.
+
+A definição matemática do modelo será:~
+\begin{align}
+  min \sum_{[i, j] \in A} \sum_{t \in T}& c_{i, j}^{t} \cdot x_{i, j}^{t} \label{eq:objetivo}
+  \\
+  \sum_{t \in T} x_{i, j}^{t} &= y_{i, j}, &[i, j] \in A \label{eq:num-conexoes}
+  \\
+  P_{h} + \sum_{i \in V} y_{i, h} \cdot f_{i, h} &= \sum_{j \in V} y_{h, j} \cdot f_{h, j}, &h \in V \label{eq:conservacao}
+  \\
+  \sum_{t \in T} k_{t} \cdot x_{i, j}^{t} &\geq f_{i, j}, &[i, j] \in A \label{eq:limite-cabo}
+  \\
+  \sum_{j \in V | j \neq h} y_{h, j} &= 1, &h \in V_{T} \label{eq:deve-conectar}
+  \\
+  \sum_{j \in V | j \neq h} y_{h, j} &= 0, &h \in V_{0} \label{eq:sub-nao-conectar}
+  \\
+  \sum_{i \in V | i \neq h} y_{i, h} &\leq C, &h \in V_{0} \label{eq:limite-subestacao}
+  \\
+  f_{i, j} &\geq 0, &[i, j] \in A \label{eq:fluxo}
+  \\
+  f_{i, j} > 0 &\rightarrow f_{j, i} = 0, &[i, j] \in A \label{eq:fluxo-dir}
+  \\
+  f_{i, j} &> 0, &j \in V_{0},\ [i, j] \in A \label{eq:fluxo-chega-sub}
+  \\
+  % P_{j} + \sum_{i \in V} f_{i, j} &= \tau_{j}, &j \in V_{T}
+  % \\
+  % \sum_{i \in V} f_{i, j} &= \tau_{j}, &j \in V_{S}
+  % \\
+  y_{i, j} + y_{j, i} + y_{h, k} + y_{k, h} &\leq 1, &([i, j], [h, k]) \in \zeta \label{eq:cruzamento}
+  \\
+  x_{i, j}^{t} &\in \{0, 1\}, &[i, j] \in A,\ t \in T \label{eq:num-conexoes-cabo-t}
+  \\
+  y_{i, j} &\in \{0, 1\}, &[i, j] \in A \label{eq:tem-conexao}
+\end{align}
+
+A equação~\eqref{eq:objetivo} representa o objetivo do problema, que é minimizar o custo para conectar as turbinas.
+A equação~\eqref{eq:num-conexoes} define o número de conexões entre dois nós.
+A equação~\eqref{eq:conservacao} garante que a energia que chega em uma turbina sai dela juntamente com o valor produzido na mesma.
+A equação~\eqref{eq:limite-cabo} garante que a capacidade do cabo não vai ser excedida.
+A equação~\eqref{eq:deve-conectar} garante que um cabo sai de cada turbina e~\eqref{eq:sub-nao-conectar} que nenhum sai da subestação.
+A equação~\eqref{eq:limite-subestacao} limita o número máximo de cabos na subestação.
+A equação~\eqref{eq:fluxo} é o fluxo de energia do nó~$i$ em direção ao nó~$j$.
+As equações~\eqref{eq:fluxo-dir} e a equação~\eqref{eq:fluxo-chega-sub} garantem que a energia flua para a subestação.
+Note que na equação~\eqref{eq:fluxo-chega-sub} o fluxo no sentido reverso não é negativo por convenção.
+A equação~\eqref{eq:cruzamento} impede que hajam cabos cruzados.
+A equação~\eqref{eq:num-conexoes-cabo-t} garante que exista exatamente uma ou nenhuma conexão entre dois nós, enquanto a equação~\eqref{eq:tem-conexao} define o tipo de cabo utilizado na conexão.
+
+Note que a variável~$y$ define uma componente conexa na subestação.
+Isto é, o resultado será uma árvore, com a raíz na subestação e os demais nós serão as turbinas e/ou pontos de Steiner.

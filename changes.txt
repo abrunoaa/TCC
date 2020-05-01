@@ -1,0 +1,14 @@
+diferente da energia hidroeletrica vc pode só colocar (baixo impacto ambiental)
+
+slide 5: comparar o tamanho com de uma hidroeletrica (mostrar a importancia/magnitude/relevancia do trabalho)
+
+explicar formulação no slide
+complementar apresentação
+"" explicação
+
+apresentar após a formulação a solução exata e uma heuristica
+
+-----
+15/04
+
+udi mamber - branch and bound

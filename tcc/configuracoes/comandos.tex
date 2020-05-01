@@ -1,0 +1,33 @@
+\newenvironment{bottompar}{\par\vspace*{\fill}}{\clearpage}
+
+\newcommand{\newlinebreak}[1]{%
+    \foreach \X in {1, ..., #1} {
+        \linebreak
+    }
+}%
+
+%\newcommand{\probname}[1]{%
+%    \ifthenelse{\equal{#1}{portuguese}}
+%        {{{nome do problema em português}\xspace}}
+%        {{{\it name of the problem in english}\xspace}}%
+%}
+
+%\renewcommand{\baselinestretch}{3.0}
+
+\makeatletter
+\hypersetup{%
+    portuguese,
+    colorlinks=true,    % true: "links" coloridos; false: "links" em caixas de texto
+    linkcolor=black,    % define cor dos "links" internos
+    citecolor=black,    % define cor dos "links" para as referências bibliográficas
+    filecolor=black,    % define cor dos "links" para arquivos
+    urlcolor=black,     % define a cor dos "hiperlinks"
+    breaklinks=true
+}
+\makeatother
+
+\definecolor{blue}{RGB}{41,5,195} % altera o aspecto da cor azul
+
+\makeindex % cria índice remissivo
+
+\renewcommand*{\pagenumbering}[1]{}

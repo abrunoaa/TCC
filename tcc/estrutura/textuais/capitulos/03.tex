@@ -1,0 +1,69 @@
+\chapter{UNTITLED}\label{chap:3}
+
+\begin{algorithm}
+  \caption{Construção de todas as árvores possíveis}
+  \LinesNumbered
+
+  \SetAlgoLined
+  \DontPrintSemicolon
+  \SetKwProg{Fn}{Função}{}{fim}
+  \Entrada{
+    Conjunto de subestações $V_{0}$ e turbinas $V_{T}$;
+    energia $P_{v}$ produzida pela turbina $v \in V_{T}$;
+    conjunto de cabos $T$, com capacidade $k_{t}$ e custo $c_{t}$ para todo $t \in T$.
+  }
+  \Saida{Valor ótimo para conectar todos os nós~$V_{T}$ em~$V_{0}$}
+
+  \ParaCada{$i \in V_{0} \cup V_{T}$} {
+    $g_{i, \emptyset} \leftarrow (0, 0)$\;
+  }
+  \ParaCada{$i \in V_{0} \cup V_{T}$} {
+    \ParaCada{subconjunto não vazio $S \subseteq V_{T}$} {
+      $g_{i, S} \leftarrow (\infty, 0)$\;
+      \ParaCada{subconjunto não vazio $R \subseteq S$} {
+        \ParaCada{$j \in R$} {
+          \Se{$energia(g_{j, R - j}) + P_{j} \leq max_{t \in T}{(k_{t})}$} {
+            $energia \leftarrow energia(g_{j, R - j}) + P_{j} + energia(g_{i, S - R})$\;
+            $t \leftarrow $ cabo mais econômico tal que $k_{t} \geq energia$\;
+            $custo \leftarrow c_{t} \cdot dist(i, j) + custo(g_{i, S - R})$\;{}
+            \Se{$custo < custo(g_{i, S})$} {
+              $g_{i, S} \leftarrow (custo, energia)$\;
+            }
+          }
+        }
+      }
+    }
+  }
+  \Retorna{$g_{V_{0}, V_{T}}$}\;
+\end{algorithm}
+
+% \begin{algorithm}
+  % \caption{Encontrando a solução ótima}
+  % \LinesNumbered
+
+  % \SetAlgoLined
+  % \DontPrintSemicolon
+  % \SetKwProg{Fn}{Função}{}{fim}
+
+  % \Fn{SolucaoOtima} {
+    % \Saida{Valor ótimo para conexão das turbinas para subestações}
+
+    % $g_{i, k} \leftarrow ConstroiArvores()$\;
+    % $u \leftarrow$\textit{ nó qualquer de }$V_{0}$\;
+    % \ParaCada{subconjunto não vazio $k \subseteq V_{T}$} {
+      % $dp_{u, k} \leftarrow g_{k, n}.custo$\;
+    % }
+    % $j \leftarrow u$\;
+    % \ParaCada{$i \in V_{0} - u$} {
+      % $dp_{i, 0} \leftarrow 0$\;
+      % \ParaCada{subconjunto não vazio $k \subseteq V_{T}$} {
+        % $dp_{i, k} \leftarrow dp_{j, k}$\;
+        % \ParaCada{subconjunto não vazio $h \subseteq k$} {
+          % $dp_{i, k} \leftarrow g_{h, i}.custo + dp_{j, k - h}$\;
+        % }
+      % }
+      % $j \leftarrow i$\;
+    % }
+    % \Retorna{$dp_{j, V_{T}}$}\;
+  % }
+% \end{algorithm}
