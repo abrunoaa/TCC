@@ -12,3 +12,8 @@ apresentar após a formulação a solução exata e uma heuristica
 15/04
 
 udi mamber - branch and bound
+
+-----
+# versões do código
+1º seleção aleatória: 635a229
+2º seleção probabilística: b233db7
