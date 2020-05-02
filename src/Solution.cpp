@@ -14,125 +14,148 @@ using namespace std;
 
 
 struct Solution {
-  static const int MAX_ATTEMPTS = 100;
+  struct ExchangeCandidate {
+    lf change;
+    int u, v;
 
-  int reachSubstation;
-  double fitness;
+    bool operator<(const ExchangeCandidate& that) const {
+      return change < that.change;
+    }
+  };
+
+  int reachSubCount;
+  lf fitness;
   vector<int> next;
   vector<int> energy;
 
-  int chooseNeighbor(int u) const {
-    assertValid();
-    if (next[u] == n && reachSubstation == 1) {
-      return -1;
-    }
+  /**
+   * Check if changing the parent of node u to v creates an intersection.
+   * @param u Node to change parent
+   * @param v Candidate parent
+   * @return true If isn't possible to change parent of u to v.
+   */
+  bool createIntersection(int u, int v) const {
+    for (int w = 0; w < n; ++w)
+      if (w != u && intersect(u, v, w, next[w]))
+        return 1;
+    return 0;
+  }
 
-    auto deep = next;
-    deep[u] = u;
-    function<int(int)> find;
-    find = [&find, &deep](int v) {
-      return deep[v] == v || deep[v] == n ? v : deep[v] = find(deep[v]);
+  /**
+   * Find the depth of u on the tree
+   * @param u Node to verify.
+   * @return Depth of node u.
+   */
+  int depth(int u) const {
+    int d = 0;
+    for (; u != n; u = next[u]) ++d;
+    return d;
+  }
+
+  /**
+   * Check what will happen to cost if the parent of u is changed to v.
+   * @param u Node to change parent
+   * @param v Candidate node to be parent of u
+   * @return The change that will happen if parent of u is changed to v
+   */
+  lf changeInCost(int u, int v) const {
+    assert(0 <= u && u < n);
+    assert(0 <= v && v <= n);
+    assert(u != v);
+
+    int e = energy[u];
+    // debug(u, v, e);
+    assert(cmp(e, 0) > 0);
+    lf ans = (dist(u, next[u]) - dist(u, v)) * bestCableCost(e);
+    // debug(ans, dist(u, v), dist(u, next[u]), bestCableCost(e));
+
+    auto upCost = [this](int x, int add) {
+      // debug(x, next[x], dist(x, next[x]), energy[x], add, energy[x] + add, bestCableCost(energy[x] + add), bestCableCost(energy[x]));
+      return dist(x, next[x]) * (bestCableCost(energy[x]) - bestCableCost(energy[x] + add));
     };
 
-    vector<int> candidate;
-    for (int v = 0; v < n; ++v) {
-      if (v != u && v != next[u] && find(v) != u && energy[u] + energy[find(v)] <= k.back()) {
-        bool flag = 1;
-        for (int w = 0; w < n; ++w) {
-          if (intersect(turbines[u], turbines[v], turbines[w], turbines[next[w]])) {
-            debug(turbines[u], turbines[v], turbines[w], turbines[next[w]]);
-            flag = 0;
-            break;
-          }
-        }
-        if (flag) {
-          candidate.push_back(v);
-        }
-      }
-    }
+    u = next[u];
+    int du = depth(u), dv = depth(v);
+    // debug(u, v, du, dv);
+    for (; du < dv; v = next[v], --dv) ans += upCost(v, +e);
+    for (; du > dv; u = next[u], --du) ans += upCost(u, -e);
+    for (; v != u; v = next[v], u = next[u]) ans += upCost(v, +e) + upCost(u, -e);
 
-    if (candidate.empty()) {
-      return -1;
-    }
+    return ans;
+  }
 
-    debug(u, candidate);
-    for (int x : candidate) {
-      debug(u, x, find(x));
+  void updateEnergy(int u, int e) {
+    for (; u != n; u = next[u]) {
+      energy[u] += e;
+      assert(cmp(energy[u], 0) > 0);
     }
-    uniform_int_distribution<int> uid(0, (int)candidate.size() - 1);
-    return candidate[uid(rng)];
   }
 
   Solution neighbor() const {
     assertValid();
-    uniform_int_distribution<int> uid(0, (int)next.size() - 1);
-    for (int i = 0; i < MAX_ATTEMPTS; ++i) {
-      int u = uid(rng);
-      int v = chooseNeighbor(u);
-      debug("connect", u, v);
-      if (v != -1) {
-        Solution that;
-        that.next = next;
-        that.reachSubstation = reachSubstation + (v == n) - (next[u] == n);
+
+    vector<ExchangeCandidate> candidates;
+    for (int u = 0; u < n; ++u) {
+      // ignore if it's the only node to reach substation
+      if (next[u] == n && reachSubCount == 1) {
+        continue;
+      }
+
+      // farthest parent of node which reach substation
+      // u is the flag for invalid
+      auto p = next;
+      function<int(int)> reachSub;
+      reachSub = [&](int w) {
+        return w == u || p[w] == n ? w : p[w] = reachSub(p[w]);
+      };
+
+      // check for candidates
+      for (int v = 0; v < n; ++v)
+        if (u != v && v != next[u] && reachSub(v) != u && energy[u] + energy[reachSub(v)] <= k.back() && !createIntersection(u, v))
+          candidates.push_back({changeInCost(u, v), u, v});
+      if (next[u] != n && reachSubCount < C && !createIntersection(u, n))
+        candidates.push_back({changeInCost(u, n), u, n});
+    }
+
+    if (candidates.empty()) {
+      cerr << next << '\n';
+      throw domain_error("Solution trapped!");
+    }
+
+    sort(candidates.begin(), candidates.end());
+    lf sum = 0;
+    for (auto candidate : candidates) {
+      sum += candidate.change - candidates[0].change + 1;
+    }
+
+    uniform_real_distribution<lf> urd(0, sum);
+    lf r = urd(rng);
+    for (auto [change, u, v] : candidates) {
+      r -= change - candidates[0].change + 1;
+      if (r < 0) {
+        debug(u, v, change, fitness, fitness - change);
+        Solution that = *this;
+        // that.assertValid();
+        that.updateEnergy(next[u], -energy[u]);
+        that.updateEnergy(v, energy[u]);
+        that.reachSubCount += (v == n) - (that.next[u] == n);
         that.next[u] = v;
-        that.evalFitness();
+        that.fitness -= change;
+        assert(cmp(changeInCost(u, v), change) == 0);
+        // Solution &other = that;
+        // debug(this->next);
+        // debug(other.next);
+        // debug(this->energy);
+        // debug(other.energy);
+        that.assertValid();
         return that;
       }
     }
-
-    int withoutConnection = 0;
-    for (int u = 0; u < n; ++u) {
-      int v = chooseNeighbor(u);
-      withoutConnection += v == -1;
-    }
-    cerr << " ** no change! **\n";
-    if (withoutConnection == n) {
-      cerr << " ***** Trapped!!! *****\n";
-    }
-    return *this;
+    assert(0);
+    exit(1);
   }
 
   void localSearch() {
-  }
-
-  static Solution bestInitial() {
-    Solution best;
-    best.fitness = 1e100;
-    for (int i = 0; i < n; ++i) {
-      Solution other = Solution::build(i);
-      if (other.fitness < best.fitness) {
-        best = move(other);
-      }
-    }
-    debug(best.fitness, best.next, best.energy);
-    best.assertValid();
-    return best;
-  }
-
-  static Solution build(int start) {
-    debug(start);
-
-    Solution solution;
-    solution.fitness = 1e20;
-    solution.reachSubstation = 0;
-
-    auto &g = solution.next;
-    g.resize(n);
-    for (auto zone : getZones(start)) {
-      debug(zone);
-      int u = zone.back();
-      for (int i = (int)zone.size() - 2; i >= 0; --i) {
-        int v = zone[i];
-        g[u] = v;
-        u = v;
-      }
-      g[u] = n;
-      ++solution.reachSubstation;
-    }
-
-    solution.evalFitness();
-    solution.assertValid();
-    return solution;
   }
 
   void evalEnergy() {
@@ -149,11 +172,9 @@ struct Solution {
     assert(1 <= used[n] && used[n] <= C);
 
     queue<int> q;
-    for (int u = 0; u < n; ++u) {
-      if (used[u] == 0) {
+    for (int u = 0; u < n; ++u)
+      if (used[u] == 0)
         q.push(u);
-      }
-    }
     debug(q);
     assert(q.size() > 0);
 
@@ -166,9 +187,8 @@ struct Solution {
       if (v != n) {
         energy[v] += energy[u];
         --used[v];
-        if (used[v] == 0) {
+        if (used[v] == 0)
           q.push(v);
-        }
       }
     }
 
@@ -183,10 +203,46 @@ struct Solution {
     evalEnergy();
     fitness = 0;
     for (int u = 0; u < n; ++u) {
-      int v = next[u];
-      fitness += dist(u, v) * bestCableCost(energy[u]);
+      fitness += dist(u, next[u]) * bestCableCost(energy[u]);
     }
     assertValid();
+  }
+
+  static Solution bestInitial() {
+    Solution best;
+    best.fitness = 1e100;
+    for (int i = 0; i < n; ++i)
+      if (Solution other = Solution::build(i); other.fitness < best.fitness)
+        best = move(other);
+    debug(best.fitness, best.next, best.energy);
+    best.assertValid();
+    return best;
+  }
+
+  static Solution build(int start) {
+    debug(start);
+
+    Solution solution;
+    solution.fitness = 1e20;
+    solution.reachSubCount = 0;
+
+    auto &g = solution.next;
+    g.resize(n);
+    for (auto zone : getZones(start)) {
+      debug(zone);
+      int u = zone.back();
+      for (int i = (int)zone.size() - 2; i >= 0; --i) {
+        int v = zone[i];
+        g[u] = v;
+        u = v;
+      }
+      g[u] = n;
+      ++solution.reachSubCount;
+    }
+
+    solution.evalFitness();
+    solution.assertValid();
+    return solution;
   }
 
   void assertValid(bool hasEnergy = true) const {
@@ -203,7 +259,7 @@ struct Solution {
       assert(0 <= g[u] && g[u] <= n);
     }
 
-    // without loop
+    // without cycle
     vector<int> vis(n + 1, 0);
     vis[n] = 1;
     for (int u = 0; u < n; ++u) {
@@ -212,7 +268,7 @@ struct Solution {
         for (v = u; vis[v] == 0; v = next[v]) {
           vis[v] = 2;
         }
-        debug(u, v);
+        // debug(u, v);
         assert(vis[v] == 1);
         for (v = u; vis[v] == 2; v = next[v]) {
           vis[v] = 1;
@@ -226,19 +282,22 @@ struct Solution {
     for (int u = 0; u < n; ++u) {
       go_sub += g[u] == n;
     }
-    debug(go_sub, reachSubstation);
+    debug(go_sub, reachSubCount);
     assert(go_sub > 0);
-    assert(go_sub == reachSubstation);
+    assert(go_sub == reachSubCount);
 
     if (!hasEnergy) {
       return;
     }
 
-    // must have energy
+    // everybody must have energy...
     assert((int)energy.size() - 1 == n);
     for (int u = 0; u < n; ++u) {
       assert(cmp(energy[u], production[u]) >= 0);
     }
+
+    // except substation
+    assert(energy.back() == 0);
 
     // cable that support the energy must exist
     for (int u = 0; u < n; ++u) {
@@ -248,15 +307,18 @@ struct Solution {
     }
 
     // valid cost
-    double expectedFitness = 0;
+    lf expectedFitness = 0;
     for (int u = 0; u < n; ++u) {
+      // auto d = dist(u, next[u]);
+      // auto bcc = bestCableCost(energy[u]);
+      // debug(u, next[u], energy[u], d, bcc, d * bcc);
       expectedFitness += dist(u, next[u]) * bestCableCost(energy[u]);
     }
     debug(expectedFitness, fitness);
     assert(cmp(expectedFitness, fitness) == 0);
 
     // optimal solution
-    assert(cmp(fitness, 8604208.925966221839190) >= 0);
+    assert(cmp(fitness, LOWER_BOUND) >= 0);
 #endif // NDEBUG
   }
 };

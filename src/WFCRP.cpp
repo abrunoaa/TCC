@@ -21,9 +21,9 @@ vector<Point> turbines;     // turbines location (substation is apendded)
 vector<int> production;     // production of each turbine (0 for substation)
 vector<int> order;          // turbines sorted by angle around substation
 
-vector<vector<double>> graph;     // pre-calculed distance
+vector<vector<lf>> graph;   // pre-calculed distance
 
-double dist(int u, int v) {
+lf dist(int u, int v) {
   assert(0 <= u && u <= n);
   assert(0 <= v && v <= n);
   return graph[u][v];
@@ -40,8 +40,12 @@ int bestCableCost(int energy) {
   return c[bestCable(energy)];
 }
 
+bool intersect(int u, int v, int w, int x) {
+  return intersect(turbines[u], turbines[v], turbines[w], turbines[x]);
+}
+
 void buildGraph() {
-  graph.assign(n + 1, vector<double>(n + 1, 0.0));
+  graph.assign(n + 1, vector<lf>(n + 1, 0.0));
   for (int i = 0; i <= n; ++i) {
     for (int j = i + 1; j <= n; ++j) {
       graph[i][j] = graph[j][i] = dist(turbines[i], turbines[j]);

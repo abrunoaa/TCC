@@ -13,7 +13,7 @@ using namespace std;
 
 
 typedef long long ll;
-typedef double lf;
+typedef long double lf;
 
 const lf eps = 1e-9;
 const int inf = 0x3f3f3f3f;
@@ -35,7 +35,7 @@ template<class T> DEF2(front, queue<T>) template<class T> DEF2(top, stack<T>) te
 
 __attribute__((destructor))static void __destroy__() {cerr << "\nElapsed: " << (double)clock() / CLOCKS_PER_SEC << "s.\n";}
 
-#ifndef NDEBUG
+#if !defined NDEBUG && !defined NPRINT
 void debug() {}
 template<class t, class... u> void debug(const t &x, const u &...y) {cerr << ' ' << x, debug(y...);}
 
@@ -44,6 +44,6 @@ template<class t, class... u> void debug(const t &x, const u &...y) {cerr << ' '
 #else
 #define debug(x...) void(0)
 #define sleep(x) void(0)
-#endif  // NDEBUG
+#endif // NDEBUG && NPRINT
 
 #endif // CONSTANT_CPP

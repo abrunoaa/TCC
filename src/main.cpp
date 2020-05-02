@@ -1,7 +1,10 @@
 #define NDEBUG
+// #define NPRINT
 
 #include <iostream>
 using namespace std;
+
+const double LOWER_BOUND = 19400000;
 
 #include "Constants.cpp"
 #include "WFCRP.cpp"
@@ -13,19 +16,16 @@ int main() {
   // ios::sync_with_stdio(false);
   // cin.tie(nullptr);
   cout.tie(nullptr);
+  cerr << fixed << setprecision(9);
 
   // read("in");
   // read("inr");
-  read("../instances/wf02_cb04_capex.crp");
+  read("../instances/wf01_cb01_capex.crp");
 
   Solution solution = Solution::bestInitial();
   cout << solution;
 
-  Solution sa = simulatedAnnealing(1000, 1, 0.99999, solution);
-  cout << sa;
-  for (int i = 0; i < 5; ++i) {
-    sa = simulatedAnnealing(10, 1, 0.99999, sa);
-  }
+  Solution sa = simulatedAnnealing(1000000, 1, 0.999, solution);
   cout << sa;
 
   /*
