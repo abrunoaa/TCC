@@ -1,0 +1,111 @@
+Using license file /home/brunoalmeda/gurobi.lic
+Academic license - for non-commercial use only
+Changed value of parameter TimeLimit to 86400.0
+   Prev: inf  Min: 0.0  Max: inf  Default: inf
+Changed value of parameter lazyconstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (linux64)
+Optimize a model with 961 rows, 2790 columns and 6360 nonzeros
+Model fingerprint: 0xceb9f3d9
+Variable types: 930 continuous, 1860 integer (1860 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 2e+01]
+  Objective range  [2e+05, 3e+06]
+  Bounds range     [1e+00, 3e+01]
+  RHS range        [1e+00, 1e+00]
+Presolve removed 1 rows and 60 columns
+Presolve time: 0.01s
+Presolved: 960 rows, 2730 columns, 6300 nonzeros
+Variable types: 930 continuous, 1800 integer (1800 binary)
+Found heuristic solution: objective 4.845207e+07
+
+Root relaxation: objective 8.488687e+06, 1365 iterations, 0.02 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 8488687.21    0   32 4.8452e+07 8488687.21  82.5%     -    0s
+H    0     0                    9704313.4687 8488687.21  12.5%     -    0s
+     0     0 8554331.83    0   33 9704313.47 8554331.83  11.9%     -    0s
+     0     0 8554718.56    0   35 9704313.47 8554718.56  11.8%     -    0s
+     0     0 8565395.83    0   41 9704313.47 8565395.83  11.7%     -    0s
+     0     0 8567390.12    0   37 9704313.47 8567390.12  11.7%     -    0s
+     0     0 8567631.86    0   38 9704313.47 8567631.86  11.7%     -    0s
+     0     0 8567631.86    0   38 9704313.47 8567631.86  11.7%     -    0s
+     0     0 8571482.52    0   41 9704313.47 8571482.52  11.7%     -    0s
+H    0     0                    8868110.0269 8571482.52  3.34%     -    0s
+     0     0 8572009.88    0   43 8868110.03 8572009.88  3.34%     -    0s
+     0     0 8572011.42    0   43 8868110.03 8572011.42  3.34%     -    0s
+     0     0 8573152.25    0   32 8868110.03 8573152.25  3.33%     -    0s
+     0     0 8573152.25    0   32 8868110.03 8573152.25  3.33%     -    0s
+     0     0 8573152.25    0   40 8868110.03 8573152.25  3.33%     -    0s
+     0     0 8573152.25    0   38 8868110.03 8573152.25  3.33%     -    0s
+     0     0 8573152.25    0   32 8868110.03 8573152.25  3.33%     -    0s
+     0     0 8574458.82    0   51 8868110.03 8574458.82  3.31%     -    0s
+     0     0 8574538.94    0   28 8868110.03 8574538.94  3.31%     -    0s
+     0     0 8574973.57    0   35 8868110.03 8574973.57  3.31%     -    0s
+     0     0 8575096.50    0   47 8868110.03 8575096.50  3.30%     -    0s
+     0     0 8576520.43    0   31 8868110.03 8576520.43  3.29%     -    0s
+     0     0 8576547.52    0   40 8868110.03 8576547.52  3.29%     -    0s
+     0     0 8576654.09    0   45 8868110.03 8576654.09  3.29%     -    0s
+     0     0 8576654.09    0   45 8868110.03 8576654.09  3.29%     -    0s
+     0     2 8578580.55    0   45 8868110.03 8578580.55  3.26%     -    0s
+*  102   101              14    8651803.5013 8583733.38  0.79%  23.5    0s
+*  251   117               9    8604208.9260 8595279.71  0.10%  20.7    0s
+
+Cutting planes:
+  Gomory: 16
+  Implied bound: 14
+  MIR: 71
+  Flow cover: 38
+  Inf proof: 3
+  Network: 10
+  RLT: 10
+  Relax-and-lift: 1
+
+Explored 332 nodes (8797 simplex iterations) in 0.64 seconds
+Thread count was 8 (of 8 available processors)
+
+Solution count 5: 8.60421e+06 8.6518e+06 8.86811e+06 ... 4.84521e+07
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (4.9351e-06) exceeds tolerance
+Warning: max bound violation (1.6450e-06) exceeds tolerance
+Best objective 8.604208925966e+06, best bound 8.604208925966e+06, gap 0.0000%
+
+User-callback calls 1192, time in user-callback 0.01 sec
+
+Solução: 8604208.925966221839190
+Conexões:
+> Subestação = 30
+> Valores: origem destino cabo
+0 1 0
+1 6 0
+2 3 0
+3 4 0
+4 9 0
+5 10 0
+6 7 0
+7 2 0
+8 9 0
+9 30 1
+10 11 0
+11 12 0
+12 8 0
+13 12 0
+14 30 1
+15 11 0
+16 17 0
+17 18 0
+18 14 0
+19 14 0
+20 21 0
+21 16 0
+22 26 0
+23 18 0
+24 19 0
+25 21 0
+26 27 0
+27 28 0
+28 29 0
+29 24 0
