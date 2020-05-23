@@ -13,6 +13,11 @@ using namespace std;
 #include "WFCRP.cpp"
 
 
+struct Solution;
+
+ostream& operator<<(ostream& out, const Solution& s);
+
+
 struct Solution {
   struct ExchangeCandidate {
     lf change;
@@ -118,6 +123,8 @@ struct Solution {
     }
 
     if (candidates.empty()) {
+      cout << "Current solution:\n";
+      cout << *this;
       cerr << next << '\n';
       throw domain_error("Solution trapped!");
     }

@@ -10,9 +10,9 @@ from math import hypot
 
 
 INSTANCES = '../../instances/'
-RESULTS = '../../results/'
-#  TIME_LIMIT = 24 * 60 * 60
-TIME_LIMIT = None
+RESULTS = '../../results/gurobi'
+TIME_LIMIT = 2 * 60 * 60
+#  TIME_LIMIT = None
 
 colors = [
   'tab:cyan',

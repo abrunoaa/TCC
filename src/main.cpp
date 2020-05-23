@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace std;
 
-const double LOWER_BOUND = 19400000;
+const double LOWER_BOUND = 0;
 
 #include "Constants.cpp"
 #include "WFCRP.cpp"
@@ -12,21 +12,31 @@ const double LOWER_BOUND = 19400000;
 #include "SimulatedAnnealing.cpp"
 
 
-int main() {
+int main(int argc, char **argv) {
   // ios::sync_with_stdio(false);
   // cin.tie(nullptr);
   cout.tie(nullptr);
   cerr << fixed << setprecision(9);
 
+  string dirname = "../instances/";
+  string filename = argv[1] + string(".crp");
+
   // read("in");
   // read("inr");
-  read("../instances/wf01_cb01_capex.crp");
+  read((dirname + filename).data());
 
+  if (!freopen(("../results/sa/" + filename).data(), "w", stdout)) {
+    cerr << "Can't open output\n";
+    return 1;
+  }
+
+  auto start = clock();
   Solution solution = Solution::bestInitial();
-  cout << solution;
+  cout << solution << "Elapsed: " << (double)(clock() - start) / CLOCKS_PER_SEC << "s\n\n";
 
-  Solution sa = simulatedAnnealing(1000000, 1, 0.999, solution);
-  cout << sa;
+
+  Solution sa = simulatedAnnealing(10000000, 1, 0.9999, solution);
+  cout << sa << "Elapsed: " << (double)(clock() - start) / CLOCKS_PER_SEC << "s\n\n";
 
   /*
   if (!freopen("inopt", "r", stdin)) {
